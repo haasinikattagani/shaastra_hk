@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gears of Change | Haasini's Login</title>
+<style>
+  /* 1. Colours in one place */
+  :root {
+    --blue: #1e4fd8;
+    --deep: #12328f;
+    --yellow: #ffd23f;
+    --sky: #cfe0ff;
+    --navy: #0b1f5c;
+    --white: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; }
+
+  /* 2. Blueprint background: blue with faint grid lines (two gradients) */
+  body {
+    min-height: 100vh;
+    font-family: "Trebuchet MS", Arial, sans-serif;
+    color: var(--white);
+    background-color: var(--blue);
+    background-image:
+      linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px);
+    background-size: 40px 40px;
+    overflow-x: hidden;
+  }
+  main {
+    position: relative; z-index: 2;
+    min-height: 100vh;
+    max-width: 1050px; margin: auto; padding: 40px 24px;
+    display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 50px;
+  }
+
+  /* 3. GEARS: one SVG drawing reused many times, rotated with CSS */
+  .gear {
+    position: fixed; z-index: 1;
+    --hole: var(--blue);               /* centre hole colour */
+    animation: turn 14s linear infinite;
+  }
+  .gear.back { animation-direction: reverse; }   /* meshing gears turn opposite ways */
+  .g1 { width: 260px; top: -90px; left: -90px; color: var(--yellow); }
+  .g2 { width: 150px; top: 100px; left: 130px; color: var(--sky); animation-duration: 8s; }
+  .g3 { width: 320px; bottom: -110px; right: -100px; color: var(--yellow); }
+  .g4 { width: 180px; bottom: 110px; right: 170px; color: var(--sky); animation-duration: 8s; }
+  @keyframes turn { to { transform: rotate(360deg); } }
+
+  /* Hovering the Launch button makes every gear spin faster */
+  body:has(.go:hover) .gear { animation-duration: 2.5s; }
+
+  /* 4. Left side: intro */
+  .intro { max-width: 400px; }
+  .intro h1 { font-size: 3rem; line-height: 1.1; text-shadow: 4px 4px 0 var(--navy); }
+  .wave { display: inline-block; animation: wave 1.5s infinite; transform-origin: 70% 70%; }
+  @keyframes wave { 25% { transform: rotate(20deg); } 75% { transform: rotate(-15deg); } }
+
+  /* Terminal-style line with a blinking cursor */
+  .terminal {
+    margin: 18px 0; padding: 10px 14px;
+    background: var(--navy); border: 3px solid var(--yellow); border-radius: 10px;
+    font-family: "Courier New", monospace; color: var(--yellow);
+  }
+  .terminal::after { content: "_"; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .intro p { line-height: 1.55; margin-bottom: 20px; }
+
+  .sticker {
+    display: inline-block; margin: 0 8px 10px 0; padding: 8px 12px;
+    background: var(--yellow); color: var(--navy);
+    border: 3px solid var(--navy); border-radius: 12px;
+    font-weight: bold; box-shadow: 4px 4px 0 var(--navy); transition: transform .2s;
+  }
+  .sticker:nth-of-type(even) { background: var(--sky); }
+  .sticker:hover { transform: rotate(-6deg) scale(1.1); }
+
+  /* 5. Login card (from my first version) */
+  .card {
+    position: relative; width: 340px; margin-top: 50px;
+    padding: 80px 30px 28px;
+    background: var(--white); color: var(--navy);
+    border: 4px solid var(--navy); border-radius: 26px;
+    box-shadow: 10px 10px 0 var(--yellow), 10px 10px 0 4px var(--navy);
+    transform: rotate(1.5deg); transition: transform .3s;
+  }
+  .card:hover, .card:focus-within { transform: rotate(0); }
+  .card h2 { text-align: center; color: var(--blue); font-size: 1.7rem; }
+  .card .sub { text-align: center; margin: 4px 0 20px; padding-bottom: 16px; border-bottom: 3px dashed var(--navy); }
+
+  /* 6. Robot mascot: eyes, hands and mouth move depending on what you do */
+  .bot { position: absolute; left: 50%; top: -58px; width: 126px; transform: translateX(-50%); overflow: visible; }
+  .bot .pupil, .bot .hand, .bot .mouth { transition: transform .25s, d .25s; transform-box: fill-box; transform-origin: center; }
+  .card:has(#mail:focus) .pupil { transform: translateY(4px); }               /* looks down at email */
+  .card:has(#pw:focus) .hand.l { transform: translate(28px, -48px); }         /* covers eyes for password */
+  .card:has(#pw:focus) .hand.r { transform: translate(-28px, -48px); }
+  .card:has(.go:hover) .mouth { d: path("M42 74 Q60 98 78 74 Z"); fill: #fff; } /* big grin */
+
+  /* 7. Form */
+  label { display: block; font-weight: bold; margin: 0 0 5px 3px; }
+  .field { margin-bottom: 16px; }
+  input[type=email], input[type=password] {
+    width: 100%; padding: 12px; font: inherit;
+    border: 3px solid var(--navy); border-radius: 12px; transition: .15s;
+  }
+  input:focus { outline: none; border-color: var(--blue); box-shadow: 4px 4px 0 var(--yellow); transform: translate(-2px,-2px); }
+
+  .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: .9rem; }
+  .keep { display: flex; align-items: center; gap: 8px; margin: 0; cursor: pointer; }
+  .keep input { position: absolute; opacity: 0; }
+  .keep i { width: 44px; height: 24px; border: 3px solid var(--navy); border-radius: 20px; position: relative; transition: .2s; }
+  .keep i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--navy); transition: .25s; }
+  .keep input:checked + i { background: var(--yellow); }
+  .keep input:checked + i::after { transform: translateX(20px); }
+  .row a, .signup a { color: var(--blue); font-weight: bold; }
+
+  /* 8. Launch button with a rocket that flies away on hover */
+  .go {
+    position: relative; overflow: hidden; width: 100%; padding: 14px;
+    font: inherit; font-size: 1.15rem; font-weight: bold; color: var(--navy); cursor: pointer;
+    background: var(--yellow); border: 3px solid var(--navy); border-radius: 14px;
+    box-shadow: 5px 5px 0 var(--navy); transition: .15s;
+  }
+  .go:hover { background: var(--blue); color: var(--white); }
+  .go:active { transform: translate(4px,4px); box-shadow: 1px 1px 0 var(--navy); }
+  .go .rocket { position: absolute; left: 14px; top: 50%; margin-top: -.6em; transition: transform .7s ease-in; }
+  .go:hover .rocket { transform: translate(380px, -60px); }
+  .signup { text-align: center; margin-top: 16px; font-size: .9rem; }
+
+  /* 9. Phones: stack, smaller gears */
+  @media (max-width: 800px) {
+    .g2, .g4 { display: none; }
+    .go:hover .rocket { transform: translate(260px, -60px); }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+
+  <!-- Gear drawing: a dashed thick ring = teeth, a filled circle = body, a small circle = hole -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="gear" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="43" fill="none" stroke="currentColor" stroke-width="13" stroke-dasharray="5.6 5.6"/>
+      <circle cx="50" cy="50" r="38" fill="currentColor"/>
+      <circle cx="50" cy="50" r="14" fill="var(--hole)"/>
+    </symbol>
+  </svg>
+  <svg class="gear g1" viewBox="0 0 100 100" aria-hidden="true"><use href="#gear"/></svg>
+  <svg class="gear g2 back" viewBox="0 0 100 100" aria-hidden="true"><use href="#gear"/></svg>
+  <svg class="gear g3" viewBox="0 0 100 100" aria-hidden="true"><use href="#gear"/></svg>
+  <svg class="gear g4 back" viewBox="0 0 100 100" aria-hidden="true"><use href="#gear"/></svg>
+
+  <main>
+    <!-- Left: about me -->
+    <section class="intro">
+      <h1>Hi, I'm Haasini <span class="wave">👋</span></h1>
+      <div class="terminal">&gt; applying to Shaastra WebOps</div>
+      <p>
+        Haloooooooooo... Haasini here!
+         Can't wait to hopefully join the WebOps team! 
+         Check out my login page, hope you love it!
+
+      </p>
+     <p>(btw..login to get to the counter!!)</p>  
+      <span class="sticker">🎓 IIT Madras</span>
+      <span class="sticker">⚙️ Gears of Change</span>
+      <span class="sticker">SHAASTRA 2K27</span>
+      <span class="sticker">WebOps</span>
+    </section>
+
+    <!-- Right: login pass -->
+    <section class="card">
+      <svg class="bot" viewBox="0 0 120 112" aria-hidden="true">
+        <line x1="60" y1="22" x2="60" y2="8" stroke="#0b1f5c" stroke-width="4"/>
+        <circle cx="60" cy="8" r="7" fill="#1e4fd8" stroke="#0b1f5c" stroke-width="3"/>
+        <rect x="12" y="22" width="96" height="76" rx="26" fill="#ffd23f" stroke="#0b1f5c" stroke-width="4"/>
+        <circle cx="42" cy="52" r="13" fill="#fff" stroke="#0b1f5c" stroke-width="3"/>
+        <circle cx="78" cy="52" r="13" fill="#fff" stroke="#0b1f5c" stroke-width="3"/>
+        <circle class="pupil" cx="42" cy="52" r="5.5" fill="#0b1f5c"/>
+        <circle class="pupil" cx="78" cy="52" r="5.5" fill="#0b1f5c"/>
+        <circle cx="26" cy="72" r="6" fill="#1e4fd8" opacity=".35"/>
+        <circle cx="94" cy="72" r="6" fill="#1e4fd8" opacity=".35"/>
+        <path class="mouth" d="M44 74 Q60 88 76 74" fill="none" stroke="#0b1f5c" stroke-width="4" stroke-linecap="round"/>
+        <ellipse class="hand l" cx="14" cy="102" rx="12" ry="9" fill="#cfe0ff" stroke="#0b1f5c" stroke-width="3"/>
+        <ellipse class="hand r" cx="106" cy="102" rx="12" ry="9" fill="#cfe0ff" stroke="#0b1f5c" stroke-width="3"/>
+      </svg>
+
+      <h2>Your boarding pass</h2>
+      <p class="sub">Next stop: Shaastra, IIT Madras</p>
+
+      <form action="counter.html">
+        <div class="field">
+          <label for="mail">Email</label>
+          <input id="mail" type="email" placeholder="you@smail.iitm.ac.in" autocomplete="username">
+        </div>
+        <div class="field">
+          <label for="pw">Password</label>
+          <input id="pw" type="password" placeholder="Shh, the robot won't peek" autocomplete="current-password">
+        </div>
+        <div class="row">
+          <label class="keep"><input type="checkbox"><i></i>Keep me logged in</label>
+          <a href="#">Forgot password?</a>
+        </div>
+        <button class="go" type="submit"><span class="rocket">🚀</span>Launch me in</button>
+      </form>
+      <p class="signup">New here? <a href="#">Get your pass</a></p>
+    </section>
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Counter | Gears of Change</title>
+<style>
+  :root {
+    --blue: #1e4fd8;
+    --yellow: #ffd23f;
+    --sky: #cfe0ff;
+    --navy: #0b1f5c;
+    --white: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; }
+
+  /* Same blueprint background as the login page */
+  body {
+    min-height: 100vh;
+    font-family: "Trebuchet MS", Arial, sans-serif;
+    background-color: var(--blue);
+    background-image:
+      linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px);
+    background-size: 40px 40px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Same spinning gears */
+  .gear { position: fixed; z-index: 1; --hole: var(--blue); animation: turn 14s linear infinite; }
+  .gear.back { animation-direction: reverse; }
+  .g1 { width: 260px; top: -90px; left: -90px; color: var(--yellow); }
+  .g2 { width: 150px; top: 100px; left: 130px; color: var(--sky); animation-duration: 8s; }
+  .g3 { width: 320px; bottom: -110px; right: -100px; color: var(--yellow); }
+  .g4 { width: 180px; bottom: 110px; right: 170px; color: var(--sky); animation-duration: 8s; }
+  @keyframes turn { to { transform: rotate(360deg); } }
+
+  /* Gears speed up while you press a counter button */
+  body:has(button:active) .gear { animation-duration: 2.5s; }
+
+  .card {
+    position: relative; z-index: 2;
+    width: min(92vw, 340px); padding: 30px 36px; text-align: center;
+    background: var(--white); color: var(--navy);
+    border: 4px solid var(--navy); border-radius: 26px;
+    box-shadow: 10px 10px 0 var(--yellow), 10px 10px 0 4px var(--navy);
+  }
+  .card h2 { color: var(--blue); }
+
+  #count { font-size: 5rem; font-weight: bold; margin: 10px 0 24px; }
+  #count.pop { animation: pop .25s; }
+  @keyframes pop { 50% { transform: scale(1.3); } }
+
+  .buttons { display: flex; gap: 16px; }
+  button {
+    flex: 1; padding: 14px; font-size: 2rem; font-weight: bold; cursor: pointer;
+    color: var(--navy); background: var(--yellow);
+    border: 3px solid var(--navy); border-radius: 14px; box-shadow: 5px 5px 0 var(--navy);
+    transition: .15s;
+  }
+  #minus { background: var(--sky); }
+  button:hover { transform: translate(-2px, -2px); }
+  button:active { transform: translate(4px, 4px); box-shadow: 1px 1px 0 var(--navy); }
+  button:focus-visible { outline: 4px solid #19a7a0; outline-offset: 3px; }
+
+  .logout { display: inline-block; margin-top: 22px; color: var(--blue); font-weight: bold; }
+
+  @media (max-width: 800px) { .g2, .g4 { display: none; } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+
+  <!-- Gear drawing (same as login page) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="gear" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="43" fill="none" stroke="currentColor" stroke-width="13" stroke-dasharray="5.6 5.6"/>
+      <circle cx="50" cy="50" r="38" fill="currentColor"/>
+      <circle cx="50" cy="50" r="14" fill="var(--hole)"/>
+    </symbol>
+  </svg>
+  <svg class="gear g1" viewBox="0 0 100 100" aria-hidden="true"><use href="#gear"/></svg>
+  <svg class="gear g2 back" viewBox="0 0 100 100" aria-hidden="true"><use href="#gear"/></svg>
+  <svg class="gear g3" viewBox="0 0 100 100" aria-hidden="true"><use href="#gear"/></svg>
+  <svg class="gear g4 back" viewBox="0 0 100 100" aria-hidden="true"><use href="#gear"/></svg>
+
+  <div class="card">
+    <div id="count" aria-live="polite">0</div>
+    <div class="buttons">
+      <button id="minus" aria-label="Decrease">−</button>
+      <button id="plus" aria-label="Increase">+</button>
+    </div>
+    <a class="logout" href="login.html">← Log out</a>
+  </div>
+
+  <script>
+    // 1. Store the number and find the element that shows it
+    let count = 0;
+    const display = document.getElementById("count");
+
+    // 2. One function changes the number and updates the screen
+    function change(amount) {
+      count = Math.max(0, count + amount);
+      display.textContent = count;
+      display.classList.remove("pop");
+      void display.offsetWidth;   // restarts the bounce animation
+      display.classList.add("pop");
+    }
+
+    // 3. Each button calls that function when clicked
+    document.getElementById("plus").addEventListener("click", () => change(1));
+    document.getElementById("minus").addEventListener("click", () => change(-1));
+  </script>
+</body>
+</html>
